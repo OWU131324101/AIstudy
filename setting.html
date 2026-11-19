@@ -1,85 +1,147 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI課題プランナー</title>
-    <link rel="stylesheet" href="home.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設定 | AI課題プランナー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
 
-  <main class="container">
+<header class="app-header">
+  <div class="app-logo">AI課題プランナー</div>
+</header>
 
-      <!-- 今日やること -->
-      <section class="today-card">
-          <p class="today-label">今日やることは</p>
-          <h1 class="today-task">○○</h1>
-          <p class="today-end">です！</p>
-      </section>
+<main class="container narrow">
 
-      <div class="dashboard-grid">
+  <a href="index.html" id="back-link" class="back-link" hidden>← ホームに戻る</a>
+  <span id="first-badge" class="setting-badge" hidden>はじめに</span>
 
-          <!-- カレンダー -->
-          <section class="calendar-section">
-              <h2>📅 カレンダー</h2>
-              <div id="calendar"></div>
-          </section>
+  <h1 class="setting-title">得意・苦手を登録</h1>
+  <p class="lead">得意・苦手を教えてください。AIがあなたに合った学習計画を提案します。いつでも変更できます。</p>
 
-          <!-- 課題一覧 -->
-          <section class="task-section">
-              <div class="section-header">
-                  <h2>📝 やることリスト</h2>
-              </div>
+  <form id="setting-form" class="card" action="#" method="post">
+    <div id="skill-list"></div>
 
-              <div class="table-wrapper">
-                  <table>
-                      <thead>
-                          <tr>
-                              <th>課題名</th>
-                              <th>締切</th>
-                              <th>ステータス</th>
-                              <th>操作</th>
-                          </tr>
-                      </thead>
-                      <tbody id="task-list"></tbody>
-                  </table>
-              </div>
-          </section>
-
+    <div class="add-skill">
+      <button type="button" id="open-add" class="link-button">＋ そのほかの項目を追加</button>
+      <div id="add-form" class="add-skill-form">
+        <input type="text" id="new-skill" placeholder="例：英語のレポート" maxlength="30">
+        <button type="button" id="add-skill-btn" class="btn-sub">追加</button>
       </div>
-  </main>
+    </div>
 
-  <!-- 予定編集画面 -->
-  <div id="edit-modal" class="modal-overlay">
-      <div class="modal-content">
+    <div class="actions">
+      <button class="btn" type="submit">保存してホームへ</button>
+    </div>
+  </form>
 
-          <div class="modal-header">
-              <h2>予定を編集</h2>
-              <button id="close-modal" type="button">×</button>
-          </div>
+</main>
 
-          <label for="edit-title">課題名</label>
-          <input type="text" id="edit-title">
+<script>
+(function () {
+  var SKILLS_KEY = "plannerSkills";   // 得意・苦手の保存先
+  var DONE_KEY   = "plannerSetupDone"; // 初期設定が済んだかどうか
 
-          <label for="edit-date">取り組む日</label>
-          <input type="date" id="edit-date">
+  var LEVELS = [
+    { value: "good",   label: "得意" },
+    { value: "normal", label: "ふつう" },
+    { value: "bad",    label: "苦手" }
+  ];
 
-          <div class="modal-buttons">
-              <button id="delete-event" type="button">
-                  予定を削除
-              </button>
-              <button id="save-event" type="button">
-                  変更を保存
-              </button>
-          </div>
+  var defaults = [
+    { name: "レポート作成",   level: "bad" },
+    { name: "プログラミング", level: "normal" },
+    { name: "デザイン制作",   level: "normal" }
+  ];
 
-      </div>
-  </div>
+  function load(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
 
-  <script src="script.js"></script>
+  var skills = defaults;
+  try {
+    var saved = JSON.parse(load(SKILLS_KEY));
+    if (Array.isArray(saved) && saved.length) skills = saved;
+  } catch (e) {}
+
+  var isSetupDone = !!load(DONE_KEY);
+  document.getElementById("back-link").hidden = !isSetupDone;
+  document.getElementById("first-badge").hidden = isSetupDone;
+
+  var list = document.getElementById("skill-list");
+
+  function render() {
+    list.innerHTML = "";
+    skills.forEach(function (skill, i) {
+      var row = document.createElement("div");
+      row.className = "skill";
+
+      var name = document.createElement("span");
+      name.className = "skill-name";
+      name.textContent = skill.name;
+      row.appendChild(name);
+
+      var seg = document.createElement("div");
+      seg.className = "seg";
+      LEVELS.forEach(function (lv) {
+        var id = "skill" + i + "-" + lv.value;
+        var input = document.createElement("input");
+        input.type = "radio";
+        input.name = "skill" + i;
+        input.id = id;
+        input.value = lv.value;
+        input.checked = skill.level === lv.value;
+        input.addEventListener("change", function () { skills[i].level = lv.value; });
+
+        var label = document.createElement("label");
+        label.htmlFor = id;
+        label.textContent = lv.label;
+
+        seg.appendChild(input);
+        seg.appendChild(label);
+      });
+      row.appendChild(seg);
+      list.appendChild(row);
+    });
+  }
+  render();
+
+  // 項目の追加
+  var addForm = document.getElementById("add-form");
+  var newSkill = document.getElementById("new-skill");
+
+  document.getElementById("open-add").addEventListener("click", function () {
+    addForm.classList.toggle("open");
+    if (addForm.classList.contains("open")) newSkill.focus();
+  });
+
+  function addSkill() {
+    var name = newSkill.value.trim();
+    if (!name) return;
+    skills.push({ name: name, level: "normal" });
+    newSkill.value = "";
+    render();
+  }
+
+  document.getElementById("add-skill-btn").addEventListener("click", addSkill);
+  newSkill.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addSkill(); }
+  });
+
+  // 保存 → ホームへ
+  document.getElementById("setting-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    try {
+      localStorage.setItem(SKILLS_KEY, JSON.stringify(skills));
+      localStorage.setItem(DONE_KEY, "1");
+    } catch (err) {}
+    location.href = "index.html";
+  });
+})();
+</script>
 </body>
 </html>
