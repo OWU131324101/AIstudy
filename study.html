@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テスト対策 | AI課題プランナー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="study.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">AI課題プランナー</div>
+</header>
+
+<main class="container study">
+
+  <section class="today-card">
+    <p class="today-label">授業資料から</p>
+    <h1 class="today-task">まとめノートと予想問題をつくろう</h1>
+    <p class="today-end">資料を入れると、AIがテスト前に見返せる形に整理します。</p>
+  </section>
+
+  <section class="card study-card">
+    <h2>授業資料を選ぶ</h2>
+
+    <label id="dropzone" class="dropzone" for="file-input">
+      <span class="dropzone-main">ここにファイルをドラッグ、またはクリックして選択</span>
+      <span class="dropzone-sub">PDF・テキスト(.txt / .md)・画像(JPG / PNG)　複数OK</span>
+    </label>
+    <input type="file" id="file-input" multiple accept=".pdf,.txt,.md,image/*" hidden>
+
+    <ul id="file-list" class="file-list"></ul>
+
+    <div class="options">
+      <div class="option">
+        <label for="opt-count">予想問題の数</label>
+        <select id="opt-count">
+          <option value="5">5問</option>
+          <option value="10" selected>10問</option>
+          <option value="15">15問</option>
+        </select>
+      </div>
+      <div class="option">
+        <label for="opt-style">問題の形式</label>
+        <select id="opt-style">
+          <option value="mixed" selected>選択式と記述式のミックス</option>
+          <option value="choice">選択式のみ</option>
+          <option value="written">記述式のみ</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="button" id="generate-btn" class="btn" disabled>まとめノートと予想問題を作成</button>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="result" class="card study-card" hidden>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" id="tab-notes" aria-selected="true" aria-controls="panel-notes">📘 まとめノート</button>
+      <button type="button" class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="panel-quiz">✏️ 予想問題</button>
+    </div>
+
+    <div id="panel-notes" class="panel" role="tabpanel" aria-labelledby="tab-notes"></div>
+    <div id="panel-quiz" class="panel" role="tabpanel" aria-labelledby="tab-quiz" hidden></div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var MAX_FILES = 10;
+  var MAX_TOTAL_MB = 20;
+
+  var files = [];
+  var input = document.getElementById("file-input");
+  var dropzone = document.getElementById("dropzone");
+  var listEl = document.getElementById("file-list");
+  var btn = document.getElementById("generate-btn");
+  var statusEl = document.getElementById("status");
+  var resultEl = document.getElementById("result");
+
+  /* ---------- ファイル選択 ---------- */
+  function isAllowed(f) {
+    var n = f.name.toLowerCase();
+    return f.type.indexOf("image/") === 0 || /\.(pdf|txt|md)$/.test(n);
+  }
+
+  function addFiles(fileList) {
+    var rejected = false;
+    Array.prototype.forEach.call(fileList, function (f) {
+      if (!isAllowed(f)) { rejected = true; return; }
+      var dup = files.some(function (x) { return x.name === f.name && x.size === f.size; });
+      if (!dup && files.length < MAX_FILES) files.push(f);
+    });
+    setStatus(rejected ? "対応していない形式のファイルは追加しませんでした。" : "", rejected);
+    renderFiles();
+  }
+
+  function renderFiles() {
+    listEl.innerHTML = "";
+    files.forEach(function (f, i) {
+      var li = document.createElement("li");
+      var name = document.createElement("span");
+      name.className = "file-name";
+      name.textContent = f.name;
+      var size = document.createElement("span");
+      size.className = "file-size";
+      size.textContent = (f.size / 1024 / 1024).toFixed(1) + " MB";
+      var rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "file-remove";
+      rm.setAttribute("aria-label", f.name + " を削除");
+      rm.textContent = "×";
+      rm.addEventListener("click", function () { files.splice(i, 1); renderFiles(); });
+      li.appendChild(name); li.appendChild(size); li.appendChild(rm);
+      listEl.appendChild(li);
+    });
+    btn.disabled = files.length === 0;
+  }
+
+  input.addEventListener("change", function () { addFiles(input.files); input.value = ""; });
+
+  ["dragenter", "dragover"].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.add("dragging"); });
+  });
+  ["dragleave", "drop"].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.remove("dragging"); });
+  });
+  dropzone.addEventListener("drop", function (e) { addFiles(e.dataTransfer.files); });
+
+  function setStatus(msg, isError) {
+    statusEl.textContent = msg;
+    statusEl.classList.toggle("error", !!isError);
+  }
+
+  /* ---------- 生成 ---------- */
+  btn.addEventListener("click", async function () {
+    var total = files.reduce(function (s, f) { return s + f.size; }, 0);
+    if (total > MAX_TOTAL_MB * 1024 * 1024) {
+      setStatus("ファイルの合計サイズが " + MAX_TOTAL_MB + "MB を超えています。減らしてください。", true);
+      return;
+    }
+
+    var fd = new FormData();
+    files.forEach(function (f) { fd.append("files", f); });
+    fd.append("count", document.getElementById("opt-count").value);
+    fd.append("style", document.getElementById("opt-style").value);
+
+    btn.disabled = true;
+    btn.classList.add("loading");
+    resultEl.hidden = true;
+    setStatus("AIが資料を読んでいます…(30秒〜1分ほどかかることがあります)");
+
+    try {
+      var res = await fetch("/api/generate", { method: "POST", body: fd });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data.error || "作成に失敗しました。");
+      renderNotes(data.notes || {});
+      renderQuiz(data.questions || []);
+      resultEl.hidden = false;
+      selectTab("notes");
+      setStatus("できました！");
+      resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      setStatus(err.message || "通信に失敗しました。サーバーが起動しているか確認してください。", true);
+    } finally {
+      btn.disabled = files.length === 0;
+      btn.classList.remove("loading");
+    }
+  });
+
+  /* ---------- 表示 ---------- */
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function renderNotes(notes) {
+    var p = document.getElementById("panel-notes");
+    p.innerHTML = "";
+    p.appendChild(el("h3", "notes-title", notes.title || "まとめノート"));
+
+    (notes.sections || []).forEach(function (s) {
+      var box = el("section", "notes-section");
+      box.appendChild(el("h4", null, s.heading || ""));
+      var ul = el("ul");
+      (s.points || []).forEach(function (t) { ul.appendChild(el("li", null, t)); });
+      box.appendChild(ul);
+      p.appendChild(box);
+    });
+
+    if ((notes.keywords || []).length) {
+      var kw = el("section", "notes-section");
+      kw.appendChild(el("h4", null, "🔑 重要用語"));
+      var dl = el("dl", "keywords");
+      notes.keywords.forEach(function (k) {
+        dl.appendChild(el("dt", null, k.term || ""));
+        dl.appendChild(el("dd", null, k.meaning || ""));
+      });
+      kw.appendChild(dl);
+      p.appendChild(kw);
+    }
+  }
+
+  function renderQuiz(questions) {
+    var p = document.getElementById("panel-quiz");
+    p.innerHTML = "";
+    if (!questions.length) { p.appendChild(el("p", "muted", "問題が作成されませんでした。")); return; }
+
+    questions.forEach(function (q, i) {
+      var box = el("article", "q");
+      var head = el("div", "q-head");
+      head.appendChild(el("span", "q-num", "Q" + (i + 1)));
+      head.appendChild(el("span", "q-type", q.type === "choice" ? "選択式" : "記述式"));
+      box.appendChild(head);
+      box.appendChild(el("p", "q-text", q.question || ""));
+
+      if (q.type === "choice" && Array.isArray(q.choices)) {
+        var ol = el("ol", "q-choices");
+        q.choices.forEach(function (c) { ol.appendChild(el("li", null, c)); });
+        box.appendChild(ol);
+      }
+
+      var d = el("details", "q-answer");
+      d.appendChild(el("summary", null, "答えと解説を見る"));
+      var a = el("p", "q-a");
+      a.appendChild(el("strong", null, "答え:"));
+      a.appendChild(document.createTextNode(" " + (q.answer || "")));
+      d.appendChild(a);
+      d.appendChild(el("p", "q-exp", q.explanation || ""));
+      box.appendChild(d);
+      p.appendChild(box);
+    });
+  }
+
+  /* ---------- タブ ---------- */
+  function selectTab(name) {
+    ["notes", "quiz"].forEach(function (n) {
+      var on = n === name;
+      document.getElementById("tab-" + n).setAttribute("aria-selected", on);
+      document.getElementById("panel-" + n).hidden = !on;
+    });
+  }
+  document.getElementById("tab-notes").addEventListener("click", function () { selectTab("notes"); });
+  document.getElementById("tab-quiz").addEventListener("click", function () { selectTab("quiz"); });
+})();
+</script>
+</body>
+</html>
