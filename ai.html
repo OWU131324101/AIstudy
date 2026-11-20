@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIの学習提案 | AI課題プランナー</title>
+
+  <link rel="stylesheet" href="ai.css">
+  <script src="ai.js" defer></script>
+</head>
+
+<body>
+<main class="ai-container">
+
+  <!-- ヘッダー -->
+  <header class="ai-header">
+    <a href="index.html" class="back-btn">←</a>
+    <h1>✧ AIの学習提案</h1>
+  </header>
+
+  <!-- 分析前 -->
+  <section id="beforeAnalysis">
+
+    <h2>未着手の課題</h2>
+    <p class="description">
+      現在登録されている未着手の課題です。
+      AIが締切や得意・苦手を考慮して、
+      学習計画を提案します。
+    </p>
+
+    <div id="unfinishedList"></div>
+
+    <button id="startBtn" class="btn">
+      ✧ 分析スタート
+    </button>
+
+  </section>
+
+  <!-- 分析結果 -->
+  <section id="afterAnalysis" hidden>
+
+    <h2>おすすめの学習計画</h2>
+    <p class="description">
+      優先順位と学習予定を提案しました。
+      登録したい予定にチェックを入れてください。
+      日付の変更はホーム画面で行えます。
+    </p>
+
+    <!-- 今日やること・全体の計画 -->
+    <div class="tabs">
+      <button class="tab active" data-tab="today"
+              type="button">
+        今日やること
+      </button>
+      <button class="tab" data-tab="all"
+              type="button">
+        全体の計画
+      </button>
+    </div>
+
+    <!-- 今日 -->
+    <div id="todayContent" class="tab-content">
+      <h3>今日のおすすめ</h3>
+      <div id="todayList"></div>
+    </div>
+
+    <!-- 全体 -->
+    <div id="allContent" class="tab-content" hidden>
+      <h3>優先順位・全体の計画</h3>
+      <div id="allPlanList"></div>
+    </div>
+
+    <div class="reason-box">
+      <h3>✧ AI分析のポイント</h3>
+      <p id="analysisReason"></p>
+    </div>
+
+    <!-- 登録予定の選択 -->
+    <div class="register-section">
+      <h2>カレンダーに登録する予定</h2>
+      <p class="description">
+        登録したい予定だけ選んでください。
+      </p>
+
+      <div id="registerList"></div>
+
+      <button id="saveBtn" class="btn">
+        選択した予定を登録
+      </button>
+
+      <button id="backBtn" class="sub-btn">
+        課題一覧に戻る
+      </button>
+    </div>
+
+  </section>
+
+  <!-- 完了メッセージ -->
+  <p id="message" class="message" role="status"></p>
+
+</main>
+</body>
+</html>
