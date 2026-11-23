@@ -6,25 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AIの学習提案 | AI課題プランナー</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="ai.css">
   <script src="ai.js" defer></script>
 </head>
 
 <body>
-<main class="ai-container">
 
-  <!-- ヘッダー -->
-  <header class="ai-header">
-    <a href="index.html" class="back-btn">←</a>
-    <h1>✧ AIの学習提案</h1>
-  </header>
+<header class="app-header">
+  <div class="app-logo">AI課題プランナー</div>
+</header>
+
+<main class="container narrow ai">
+
+  <a href="index.html" class="back-link">← ホームに戻る</a>
+  <h1 class="page-title">✧ AIの学習提案</h1>
 
   <!-- 分析前 -->
-  <section id="beforeAnalysis">
+  <section id="beforeAnalysis" class="card">
 
-    <h2>未着手の課題</h2>
+    <h2>未完了の課題</h2>
     <p class="description">
-      現在登録されている未着手の課題です。
+      現在登録されている「まだ」「途中」の課題です。
       AIが締切や得意・苦手を考慮して、
       学習計画を提案します。
     </p>
@@ -38,7 +44,7 @@
   </section>
 
   <!-- 分析結果 -->
-  <section id="afterAnalysis" hidden>
+  <section id="afterAnalysis" class="card" hidden>
 
     <h2>おすすめの学習計画</h2>
     <p class="description">
