@@ -1,7 +1,4 @@
-
-// ================================
 // 1. HTML要素の取得
-// ================================
 
 const beforeAnalysis =
   document.getElementById("beforeAnalysis");
@@ -25,22 +22,29 @@ const message =
   document.getElementById("message");
 
 
-// ================================
+
 // 2. localStorageからデータ取得
-// ================================
 
 const tasksData = JSON.parse(
   localStorage.getItem("tasks") || "[]"
 );
 
-const settings = JSON.parse(
-  localStorage.getItem("settings") || "null"
-);
+// setting.html が保存する得意・苦手
+let plannerSkills = [];
+
+try {
+  const parsed = JSON.parse(
+    localStorage.getItem("plannerSkills") || "[]"
+  );
+
+  if (Array.isArray(parsed)) {
+    plannerSkills = parsed;
+  }
+} catch (e) {}
 
 
-// ================================
+
 // 3. 日付の処理
-// ================================
 
 // YYYY-MM-DD形式に変換
 function formatDate(date) {
@@ -112,41 +116,31 @@ function displayDate(dateString) {
 }
 
 
-// ================================
+
 // 4. 得意・苦手の取得
-// ================================
+
+const LEVEL_LABELS = {
+  good: "得意",
+  normal: "ふつう",
+  bad: "苦手"
+};
 
 function getSkill(category) {
-  if (!settings) return "ふつう";
+  const item = plannerSkills.find(
+    skill => skill.name === category
+  );
 
-  const fixed = {
-    "レポート作成": settings.report,
-    "プログラミング": settings.programming,
-    "デザイン制作": settings.design
-  };
-
-  if (fixed[category]) {
-    return fixed[category];
-  }
-
-  const custom = (
-    settings.custom || []
-  ).find(item => item.name === category);
-
-  return custom?.level || "ふつう";
+  return LEVEL_LABELS[item?.level] || "ふつう";
 }
 
 
-// ================================
 // 5. 未着手の課題を取得
-// ================================
 
 const unfinishedTasks = (
   Array.isArray(tasksData) ? tasksData : []
 )
 .filter(task =>
-  task.status === "まだ" ||
-  task.status === "未着手"
+  task.status !== "完了"
 )
 .map((task, index) => ({
   id: String(task.id ?? `task_${index}`),
@@ -167,9 +161,8 @@ const unfinishedTasks = (
 }));
 
 
-// ================================
+
 // 6. 未着手の課題を表示
-// ================================
 
 function showUnfinishedTasks() {
   unfinishedList.replaceChildren();
@@ -179,7 +172,7 @@ function showUnfinishedTasks() {
     empty.className = "empty-message";
 
     empty.textContent =
-      "未着手の課題はありません。ホーム画面から課題を登録してください。";
+      "未完了の課題はありません。ホーム画面から課題を登録してください。";
 
     unfinishedList.appendChild(empty);
 
@@ -211,9 +204,7 @@ function showUnfinishedTasks() {
 }
 
 
-// ================================
 // 7. 優先順位の計算
-// ================================
 
 function calculatePriority(task) {
   let score = 0;
@@ -250,10 +241,7 @@ function calculatePriority(task) {
 }
 
 
-// ================================
 // 8. 学習日を自動提案
-// ================================
-
 // 各日に割り当てた学習時間
 const dailyLoad = {};
 
@@ -304,9 +292,7 @@ function suggestStudyDate(task, minutes) {
 }
 
 
-// ================================
 // 9. 分析結果の作成
-// ================================
 
 let suggestions = [];
 
@@ -406,9 +392,7 @@ function analyzeTasks() {
 }
 
 
-// ================================
 // 10. 学習計画のカード作成
-// ================================
 
 function createPlanCard(plan, rank) {
   const card = document.createElement("div");
@@ -446,9 +430,8 @@ function createPlanCard(plan, rank) {
 }
 
 
-// ================================
+
 // 11. 今日やること
-// ================================
 
 function showTodayPlan() {
   todayList.replaceChildren();
@@ -478,9 +461,7 @@ function showTodayPlan() {
 }
 
 
-// ================================
 // 12. 全体の計画
-// ================================
 
 function showAllPlan() {
   allPlanList.replaceChildren();
@@ -493,9 +474,7 @@ function showAllPlan() {
 }
 
 
-// ================================
 // 13. カレンダー登録の選択
-// ================================
 
 function showRegisterList() {
   registerList.replaceChildren();
@@ -537,9 +516,7 @@ function showRegisterList() {
 }
 
 
-// ================================
 // 14. カレンダーに登録する
-// ================================
 
 function savePlans() {
   const selectedPlans = suggestions.filter(
@@ -553,45 +530,41 @@ function savePlans() {
     return;
   }
 
-  // これまでに登録された予定を取得
-  const saved = JSON.parse(
-    localStorage.getItem("studySchedules") || "[]"
-  );
+  // ホームのカレンダーが読む予定を取得
+  let saved = [];
 
-  const existingSchedules =
-    Array.isArray(saved) ? saved : [];
+  try {
+    const parsed = JSON.parse(
+      localStorage.getItem("calendarEvents") || "[]"
+    );
 
-  // 今回分析した課題ID
+    if (Array.isArray(parsed)) {
+      saved = parsed;
+    }
+  } catch (e) {}
+
+  // 今回の課題について以前AI登録した予定だけを
+  // 取り除く(ほかの予定は残す)
   const analyzedIds = new Set(
-    suggestions.map(plan => String(plan.id))
+    suggestions.map(plan => `ai_${plan.id}`)
   );
 
-  // 今回の課題について以前AI登録した
-  // 予定だけを取り除く
-  // ほかの手動予定は残す
-  const remainingSchedules =
-    existingSchedules.filter(schedule => {
-      return !(
-        schedule.source === "ai" &&
-        analyzedIds.has(String(schedule.taskId))
-      );
-    });
+  const remainingEvents = saved.filter(
+    event => !analyzedIds.has(String(event.id))
+  );
 
-  // チェックした予定だけ登録
+  // チェックした予定だけ、カレンダーの形式で登録
   const newSchedules = selectedPlans.map(plan => ({
     id: `ai_${plan.id}`,
-    taskId: plan.id,
     title: plan.title,
-    date: plan.studyDate,
-    minutes: plan.minutes,
-    source: "ai",
-    completed: false
+    start: plan.studyDate,
+    allDay: true
   }));
 
   localStorage.setItem(
-    "studySchedules",
+    "calendarEvents",
     JSON.stringify([
-      ...remainingSchedules,
+      ...remainingEvents,
       ...newSchedules
     ])
   );
@@ -604,9 +577,7 @@ function savePlans() {
 }
 
 
-// ================================
 // 15. タブ切り替え
-// ================================
 
 document.querySelectorAll(".tab").forEach(
   button => {
@@ -631,9 +602,7 @@ document.querySelectorAll(".tab").forEach(
 );
 
 
-// ================================
 // 16. ボタンのイベント
-// ================================
 
 // 分析スタート
 document.getElementById(
@@ -655,8 +624,6 @@ document.getElementById(
 });
 
 
-// ================================
 // 17. 最初に表示
-// ================================
 
 showUnfinishedTasks();

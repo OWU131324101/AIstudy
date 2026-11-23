@@ -26,9 +26,28 @@
       <!-- 今日やること -->
       <section class="today-card">
           <p class="today-label">今日やることは</p>
-          <h1 class="today-task">○○</h1>
-          <p class="today-end">です！</p>
+          <h1 class="today-task" id="today-task">読み込み中…</h1>
+          <p class="today-end" id="today-end">です！</p>
       </section>
+
+      <!-- メニュー(各ページへのリンク) -->
+      <nav class="menu-grid" aria-label="メニュー">
+          <a href="ai.html" class="menu-card menu-primary">
+              <span class="menu-icon">✧</span>
+              <span class="menu-name">AIの学習提案</span>
+              <span class="menu-desc">優先順位と予定を提案</span>
+          </a>
+          <a href="task.html" class="menu-card">
+              <span class="menu-icon">📝</span>
+              <span class="menu-name">課題を登録</span>
+              <span class="menu-desc">追加・編集・削除</span>
+          </a>
+          <a href="study.html" class="menu-card">
+              <span class="menu-icon">📚</span>
+              <span class="menu-name">テスト対策</span>
+              <span class="menu-desc">ノートと予想問題</span>
+          </a>
+      </nav>
 
       <div class="dashboard-grid">
 

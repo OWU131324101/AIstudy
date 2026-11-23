@@ -18,6 +18,8 @@
 
 <main class="container study">
 
+  <a href="index.html" class="back-link">← ホームに戻る</a>
+
   <section class="today-card">
     <p class="today-label">授業資料から</p>
     <h1 class="today-task">まとめノートと予想問題をつくろう</h1>
@@ -83,7 +85,7 @@
   var statusEl = document.getElementById("status");
   var resultEl = document.getElementById("result");
 
-  /* ---------- ファイル選択 ---------- */
+  /* ファイル選択 */
   function isAllowed(f) {
     var n = f.name.toLowerCase();
     return f.type.indexOf("image/") === 0 || /\.(pdf|txt|md)$/.test(n);
@@ -137,7 +139,7 @@
     statusEl.classList.toggle("error", !!isError);
   }
 
-  /* ---------- 生成 ---------- */
+  /* 生成 */
   btn.addEventListener("click", async function () {
     var total = files.reduce(function (s, f) { return s + f.size; }, 0);
     if (total > MAX_TOTAL_MB * 1024 * 1024) {
@@ -173,7 +175,7 @@
     }
   });
 
-  /* ---------- 表示 ---------- */
+  /* 表示 */
   function el(tag, cls, text) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -239,7 +241,7 @@
     });
   }
 
-  /* ---------- タブ ---------- */
+  /* タブ */
   function selectTab(name) {
     ["notes", "quiz"].forEach(function (n) {
       var on = n === name;

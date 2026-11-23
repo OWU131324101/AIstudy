@@ -1,7 +1,4 @@
-
-
-
-/* ===== 基本設定 ===== */
+/* 基本設定 */
 :root {
     --primary: #9477d4;
     --primary-light: #eee7ff;
@@ -588,5 +585,83 @@ td button {
     .seg label {
         flex: 1;
         min-width: 0;
+    }
+}
+
+
+/* ===== ホームのメニュー(各ページへのリンク) ===== */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.menu-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 16px 8px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(76, 53, 112, 0.04);
+    color: var(--text);
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.menu-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.menu-icon {
+    font-size: 24px;
+    line-height: 1.3;
+}
+
+.menu-name {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.menu-desc {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.menu-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.menu-primary:hover {
+    background: #8264c6;
+}
+
+.menu-primary .menu-desc {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 600px) {
+    .menu-grid {
+        gap: 8px;
+    }
+
+    .menu-card {
+        padding: 12px 4px;
+        border-radius: 14px;
+    }
+
+    .menu-name {
+        font-size: 12px;
+    }
+
+    .menu-desc {
+        display: none;
     }
 }

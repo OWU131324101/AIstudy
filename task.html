@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課題の登録・編集 | AI課題プランナー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="task.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="app-logo">AI課題プランナー</div>
+  </header>
+
+  <main class="container narrow task-page">
+
+    <a href="index.html" class="back-link">← ホームに戻る</a>
+    <h1 id="formTitle" class="page-title">課題を追加</h1>
+
+    <form id="taskForm" class="card form-card">
+      <label for="taskName">課題名</label>
+      <input type="text" id="taskName"
+        placeholder="例：データ分析レポート" required>
+
+      <label for="category">分類（得意・苦手の項目）</label>
+      <select id="category"></select>
+
+      <label for="deadline">締切</label>
+      <input type="date" id="deadline" required>
+
+      <label for="time">予想所要時間</label>
+      <select id="time">
+        <option value="30">約30分</option>
+        <option value="60">約1時間</option>
+        <option value="120" selected>約2時間</option>
+        <option value="180">約3時間</option>
+        <option value="240">約4時間以上</option>
+      </select>
+
+      <label id="statusLabel">ステータス</label>
+      <div class="status-group" role="group" aria-labelledby="statusLabel">
+        <button type="button" class="status-btn active"
+          data-status="まだ">まだ</button>
+        <button type="button" class="status-btn"
+          data-status="途中">途中</button>
+        <button type="button" class="status-btn"
+          data-status="完了">完了</button>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">
+        登録
+      </button>
+      <button type="button" class="btn-cancel" onclick="resetForm()">
+        入力をリセット
+      </button>
+    </form>
+
+    <h2 class="list-title">登録した課題</h2>
+    <div id="taskList"></div>
+
+  </main>
+
+  <script src="task.js"></script>
+</body>
+</html>

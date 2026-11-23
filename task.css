@@ -1,0 +1,135 @@
+.page-title {
+    margin: 0 0 16px;
+    font-size: clamp(22px, 4vw, 28px);
+    line-height: 1.4;
+}
+
+/* フォーム */
+.form-card label {
+    display: block;
+    margin: 18px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-card label:first-of-type {
+    margin-top: 0;
+}
+
+.form-card input[type="text"],
+.form-card input[type="date"],
+.form-card select {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    font-size: 16px;
+}
+
+.form-card input:focus,
+.form-card select:focus {
+    outline: 3px solid #cbb9ee;
+    outline-offset: 1px;
+    border-color: var(--primary);
+}
+
+/* まだ・途中・完了 切り替え(設定ページの .seg と同じ見た目) */
+.status-group {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: #f2edf9;
+    border-radius: 12px;
+}
+
+.status-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.status-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(148, 119, 212, 0.35);
+}
+
+.form-card .btn {
+    margin-top: 24px;
+}
+
+.btn-cancel {
+    display: block;
+    margin: 12px auto 0;
+    padding: 4px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+/* 登録した課題 */
+.list-title {
+    margin: 32px 0 12px;
+    font-size: 18px;
+}
+
+.task-item {
+    margin-bottom: 12px;
+    padding: 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(76, 53, 112, 0.04);
+}
+
+.task-item strong {
+    display: block;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.task-item p {
+    margin: 6px 0 12px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.task-item button {
+    margin-right: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.task-item button.delete {
+    background: #fce9ed;
+    color: #b74c67;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+}
