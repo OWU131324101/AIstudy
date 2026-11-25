@@ -2,6 +2,22 @@ let tasks = loadTasks();
 let selectedStatus = "まだ";
 let editingId = null;
 
+let messageTimer;
+
+// 完了メッセージを表示する
+function showMessage(text) {
+    const message = document.getElementById("taskMessage");
+
+    message.textContent = text;
+
+    clearTimeout(messageTimer);
+
+    // 3秒後にメッセージを消す
+    messageTimer = setTimeout(() => {
+        message.textContent = "";
+    }, 3000);
+}
+
 const categorySelect = document.getElementById("category");
 const timeSelect = document.getElementById("time");
 const statusButtons = document.querySelectorAll(".status-btn");
@@ -95,34 +111,38 @@ document.getElementById("taskForm")
 
     if (!title || !deadline) return;
 
-    if (editingId === null) {
-      tasks.push({
+    let messageText;
+
+if (editingId === null) {
+    tasks.push({
         id: Date.now(),
         title,
         category,
         deadline,
         estimatedTime,
         status: selectedStatus
-      });
+    });
 
-      alert("課題を登録しました！");
-    } else {
-      const task = tasks.find(t => t.id === editingId);
+    messageText = "課題を登録しました！";
 
-      if (task) {
-        task.title = title;
-        task.category = category;
-        task.deadline = deadline;
-        task.estimatedTime = estimatedTime;
-        task.status = selectedStatus;
-      }
+} else {
+    const task = tasks.find(t => t.id === editingId);
 
-      alert("課題を編集しました！");
-    }
+    if (!task) return;
 
-    saveTasks();
-    displayTasks();
-    resetForm();
+    task.title = title;
+    task.category = category;
+    task.deadline = deadline;
+    task.estimatedTime = estimatedTime;
+    task.status = selectedStatus;
+
+    messageText = "課題を編集しました！";
+}
+
+saveTasks();
+displayTasks();
+resetForm();
+showMessage(messageText);
   });
 
 

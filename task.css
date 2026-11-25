@@ -133,3 +133,20 @@
     color: var(--muted);
     font-size: 14px;
 }
+
+/* 登録・編集の完了メッセージ */
+.task-message {
+    margin: 12px 0 0;
+    padding: 12px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* メッセージがないときは非表示 */
+.task-message:empty {
+    display: none;
+}
