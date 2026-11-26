@@ -1,10 +1,3 @@
-"""AI課題プランナー バックエンド
-
-- /api/plan     課題の優先順位と学習予定日の提案(ai.js から呼ばれる)
-- /api/generate まとめノートと予想問題の作成(study.html から呼ばれる)
-
-APIキーは環境変数 OPENAI_API_KEY から読みます(ブラウザには渡しません)。
-"""
 import base64
 import json
 import os
